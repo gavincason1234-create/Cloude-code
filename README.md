@@ -10,15 +10,21 @@ storage, no analytics, no network calls of any kind.
 
 ## Running it
 
+Two ways, and the difference matters:
+
 ```bash
-python3 serve.py          # http://localhost:8000
-python3 serve.py 8123     # or pick a port
+npm install && npm start   # desktop shell — everything, including real WiFi scanning
+python3 serve.py           # browser — everything except WiFi (http://localhost:8000)
 ```
 
-Any static server works (`npx serve`, `php -S`, …), but you do need one:
-opening `index.html` over `file://` fails, because ES modules are blocked by
-CORS and every device API requires a secure context. `http://localhost` counts
-as secure; anything else needs real HTTPS.
+The browser build is the whole app minus one connector. The desktop shell is the
+same page in an Electron window with a narrow native bridge attached, which is
+the only way to get genuine WiFi scanning (see below).
+
+Any static server works for the browser build (`npx serve`, `php -S`, …), but
+you do need one: opening `index.html` over `file://` fails, because ES modules
+are blocked by CORS and every device API requires a secure context.
+`http://localhost` counts as secure; anything else needs real HTTPS.
 
 Chromium-family browsers expose the most connectors. Firefox and Safari have
 deliberately not shipped WebUSB, WebHID, Web Serial or Web Bluetooth — the app
@@ -55,14 +61,68 @@ chose to expose, and no vendor has shipped an equivalent.
 What the platform *does* expose is the properties of the link this device is
 already on, which is what the **Network Link** connector reports: bearer type
 (wifi / ethernet / cellular), effective class, downlink estimate, RTT, and every
-transition between them. Real data, honestly labelled. For actual airspace
-surveys you need a native tool with adapter access — `nmcli dev wifi`,
-`airport -s`, or the Windows `netsh wlan show networks`.
+transition between them. Real data, honestly labelled.
+
+For an actual airspace survey you need adapter access, which means leaving the
+browser — so the **WiFi Scan** connector delegates to the host OS through the
+desktop shell.
+
+## The desktop shell
+
+`npm start` runs the same page in an Electron window with a deliberately narrow
+bridge attached at `window.aegisNative`. There is no generic
+`invoke(channel, …)` escape hatch: the renderer gets `wifi.scan()`,
+`wifi.backend()` and the device-picker calls, and nothing else. Node is fully
+isolated from the page (`contextIsolation: true`, `sandbox: true`,
+`nodeIntegration: false`).
+
+The page is served from a custom `aegis://` scheme rather than `file://`.
+That is not cosmetic — `file://` blocks ES modules under CORS *and* is not a
+secure context, which would silently disable Web Bluetooth, WebUSB, WebHID and
+Web Serial. Registering the scheme as `standard` + `secure` restores both
+without touching `webSecurity`.
+
+### Per-platform backends
+
+| OS | Command | Caveats |
+| --- | --- | --- |
+| Linux | `nmcli -t -f IN-USE,SSID,BSSID,SIGNAL,CHAN,FREQ,SECURITY dev wifi list` | Needs NetworkManager running. A `rescan` is attempted first and ignored if rate-limited. |
+| macOS | `system_profiler SPAirPortDataType -json` | `airport -s` was gutted in 14.4 and now only prints a deprecation notice. Location Services permission is required for SSIDs, and **BSSIDs are not exposed at all** — the field stays null rather than being invented. |
+| Windows | `netsh wlan show networks mode=bssid` | Since the fall 2024 release, BSSID-bearing APIs return `ERROR_ACCESS_DENIED` without precise-location consent, with a one-time system prompt. |
+
+Failures come back as structured codes (`NO_TOOL`, `SERVICE_DOWN`,
+`PERMISSION_DENIED`, `NO_ADAPTER`, …) carrying a hint, so the UI can tell you
+*how* to fix it instead of showing an empty list. Each BSSID becomes its own
+contact, so a multi-radio AP appears once per radio and you can watch the 2.4
+and 5 GHz signals move independently.
+
+### Device choosers
+
+Electron ships no chooser UI for Bluetooth/USB/HID/Serial — without a handler
+those requests hang. `js/picker.js` draws one, fed by all four
+`select-*-device` events. The consent model is unchanged: the page still sees
+exactly one device that you picked by hand, and cancelling produces the same
+`NotFoundError` a browser chooser would. In a plain browser the module is inert
+and the browser's own picker is used.
+
+### Parser tests
+
+```bash
+npm test
+```
+
+The three output parsers are pure functions with no `child_process` import, so
+they are tested against captured fixtures on any machine — including CI runners
+with no wireless adapter. 14 tests cover the nmcli escaped-colon problem
+(BSSIDs contain colons, which terse mode escapes as `\:` — splitting naively
+shreds every MAC), multi-BSSID netsh blocks, hidden SSIDs, CRLF, the 6 GHz
+band, permission-denied output, and cross-parser record-shape agreement.
 
 ## Connectors
 
 | Connector | API | What it reports |
 | --- | --- | --- |
+| WiFi Scan | host OS via desktop shell | Nearby access points: SSID, BSSID, signal, channel, band, security, PHY mode |
 | Bluetooth LE Scan | `requestLEScan` | Nearby advertisements: name, RSSI, TX power, service UUIDs, manufacturer data |
 | Bluetooth Device Pair | `requestDevice` + GATT | Manufacturer, model, firmware, serial, battery of a device you pick |
 | Network Link | Network Information | Bearer, effective class, downlink, RTT, online transitions |
@@ -96,12 +156,21 @@ js/
   text3d.js             extruded 3D text renderer
   radar.js              canvas PPI radar
   store.js              in-memory contact store
+  picker.js             device chooser overlay (desktop shell only)
   connectors/
     base.js             Connector contract and lifecycle helpers
+    wifi.js             native WiFi scan via the desktop bridge
     bluetooth.js        LE advertisement scan, GATT device pairing
     network.js          link telemetry, local interface enumeration
     wired.js            USB, HID, Serial, media devices
     environment.js      geolocation, battery, motion, host profile
+native/
+  main.js               Electron main: custom scheme, IPC, device choosers
+  preload.cjs           the narrow bridge exposed to the page
+  scanner/
+    index.js            platform dispatch, command execution, error codes
+    parsers.js          pure nmcli / netsh / system_profiler parsers
+    parsers.test.js     fixture-driven tests, no adapter required
 ```
 
 ### The 3D text

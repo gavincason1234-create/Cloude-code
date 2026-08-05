@@ -1,0 +1,17 @@
+{
+  "name": "aegis-scanner",
+  "version": "1.0.0",
+  "description": "Consent-based device scanner — canvas radar, 3D text, and permission-gated web APIs, with an optional desktop shell for real WiFi scanning.",
+  "type": "module",
+  "main": "native/main.js",
+  "scripts": {
+    "start": "electron .",
+    "serve": "python3 serve.py",
+    "test": "node --test native/scanner/parsers.test.js"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
+  "license": "MIT",
+  "private": true
+}

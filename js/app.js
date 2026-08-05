@@ -2,6 +2,7 @@ import { Text3D } from './text3d.js';
 import { Radar } from './radar.js';
 import { ContactStore } from './store.js';
 import { CONNECTORS } from './connectors/index.js';
+import { installDevicePicker } from './picker.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -347,14 +348,21 @@ $('consent-dismiss').addEventListener('click', () => { el.consent.hidden = true;
 
 /* ------------------------------------------------------------------ boot --- */
 
+installDevicePicker(log);
+
 const supportedCount = buildConnectorList();
 refreshStats();
 renderContacts();
 
 setInterval(() => { tickUptime(); scheduleRender(); }, 1000);
 
-log('ok', `AEGIS ready — ${supportedCount}/${CONNECTORS.length} connectors available in this browser`);
+const shell = globalThis.aegisNative ? 'desktop shell' : 'browser';
+log('ok', `AEGIS ready — ${supportedCount}/${CONNECTORS.length} connectors available in this ${shell}`);
 if (!window.isSecureContext) {
   log('warn', 'insecure context: most connectors need https:// or localhost');
 }
-log('info', 'no WiFi SSID scanning exists on the web platform — the network connector reports your live link instead');
+if (globalThis.aegisNative) {
+  log('info', 'native bridge attached — WiFi scanning runs through the host OS');
+} else {
+  log('info', 'no WiFi SSID scanning exists on the web platform — run `npm start` for the desktop shell');
+}
