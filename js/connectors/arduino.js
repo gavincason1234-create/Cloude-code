@@ -135,6 +135,16 @@ export class ArduinoScannerConnector extends Connector {
     if (!(r.caps ?? []).includes('rf')) {
       this.log('warn', 'no nRF24L01+ detected — raw band sweep unavailable');
     }
+    if (r.lna) {
+      this.log('info', `+LNA module: ${r.lna} dB gain puts the detection floor at ${r.floorDbm} dBm`);
+    }
+
+    this.board = r;
+    this.publish('board', r);
+    this.publish('spectrum:configure', {
+      channels: r.channels ?? 126,
+      floorDbm: r.floorDbm ?? -64,
+    });
   }
 
   onWifi(r) {
@@ -164,6 +174,12 @@ export class ArduinoScannerConnector extends Connector {
 
   onRf(r) {
     const occupancy = r.max ? r.hits / r.max : 0;
+
+    // The spectrum panel wants every reading, including the weak ones the
+    // radar deliberately drops — that texture is the whole point of a
+    // waterfall.
+    this.publish('spectrum:channel', { channel: r.ch, occupancy });
+
     if (occupancy < ArduinoScannerConnector.RF_FLOOR) return;
 
     this.emit({
@@ -184,7 +200,16 @@ export class ArduinoScannerConnector extends Connector {
   }
 
   onSweep(r) {
-    if (r.phase === 'begin' || r.phase === 'end') return;
+    if (r.phase === 'begin') {
+      this.publish('sweep', { state: 'begin' });
+      return;
+    }
+    if (r.phase === 'end') {
+      this.publish('sweep', { state: 'end' });
+      return;
+    }
+    if (r.src === 'rf') this.publish('spectrum:commit', null);
+    this.publish('sweep', { state: 'source', src: r.src, n: r.n, ms: r.ms });
     this.log('info', `${r.src} sweep: ${r.n} result(s) in ${r.ms} ms`);
   }
 }

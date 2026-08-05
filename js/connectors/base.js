@@ -51,6 +51,12 @@ export class Connector {
 
   log(level, message) { this.bus.log(level, `[${this.constructor.id}] ${message}`); }
 
+  /**
+   * Side-channel for data that is not a contact — spectrum frames, board
+   * status. Optional: connectors that never call it need no bus support.
+   */
+  publish(topic, payload) { this.bus.publish?.(this.constructor.id, topic, payload); }
+
   /** Register a teardown function to run on stop(). */
   onStop(fn) { this.cleanup.push(fn); }
 

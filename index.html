@@ -77,6 +77,33 @@
     <ul class="connector-list" id="connector-list"></ul>
   </section>
 
+  <section class="panel panel-spectrum" id="panel-spectrum" hidden>
+    <div class="panel-head">
+      <h2>2.4 GHz Spectrum</h2>
+      <div class="panel-tools">
+        <button class="chip chip-accent" id="btn-rf-scan" type="button">Scan now</button>
+        <button class="chip" id="btn-rf-auto" type="button" aria-pressed="true">Auto</button>
+        <span class="tool-sep" aria-hidden="true"></span>
+        <button class="chip" id="btn-src-rf" type="button" aria-pressed="true">RF</button>
+        <button class="chip" id="btn-src-wifi" type="button" aria-pressed="true">WiFi</button>
+        <button class="chip" id="btn-src-ble" type="button" aria-pressed="true">BLE</button>
+      </div>
+    </div>
+
+    <div class="board-strip" id="board-strip">
+      <span class="board-item"><b>Board</b><span id="board-name">—</span></span>
+      <span class="board-item"><b>Firmware</b><span id="board-fw">—</span></span>
+      <span class="board-item"><b>Radio</b><span id="board-radio">—</span></span>
+      <span class="board-item"><b>Sources</b><span id="board-caps">—</span></span>
+      <span class="board-item"><b>Floor</b><span id="board-floor">—</span></span>
+      <span class="board-state" id="board-state">idle</span>
+    </div>
+
+    <div class="spectrum-wrap">
+      <canvas id="spectrum" role="img" aria-label="2.4 GHz spectrum occupancy and waterfall"></canvas>
+    </div>
+  </section>
+
   <section class="panel panel-contacts">
     <div class="panel-head">
       <h2>Contacts</h2>

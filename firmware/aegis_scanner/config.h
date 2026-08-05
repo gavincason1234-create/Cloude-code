@@ -74,6 +74,30 @@
 
 /* ------------------------------------------------------------ sweeping ---- */
 
+/*
+ * External LNA gain, dB.
+ *
+ * This matters more than it looks. The nRF24's Received Power Detector trips
+ * at roughly -64 dBm *at the chip's input*. On a +PA+LNA module the receive
+ * path has a low-noise amplifier in front of the chip, so a much weaker signal
+ * at the antenna still clears that threshold:
+ *
+ *     effective threshold ≈ -64 dBm − LNA gain
+ *
+ * A bare nRF24L01+ module is 0. A +PA+LNA module (the ones with an SMA
+ * connector and a screw-on antenna) is around 20, which puts the real
+ * sensitivity near -84 dBm and makes the sweep dramatically more sensitive.
+ * Set this to match your module so the reported threshold is honest — the
+ * firmware publishes it in the hello record and the UI displays it.
+ *
+ * If the sweep reads near 100% on every channel, this module is doing its job
+ * and you are seeing the whole neighbourhood; raise the app's occupancy floor
+ * rather than assuming something is broken.
+ */
+#define AEGIS_NRF_LNA_GAIN_DB 20
+
+/* The PA is irrelevant here: this firmware never transmits. */
+
 /* nRF24 channels are 1 MHz apart: 0 → 2400 MHz, 125 → 2525 MHz. */
 #define AEGIS_RF_CHANNELS 126
 

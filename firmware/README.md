@@ -59,6 +59,48 @@ prints `no nRF24L01+ on SPI`, check this before anything else — the driver
 probes by writing a register and reading it back, so a floating or
 under-powered module fails the check rather than silently returning garbage.
 
+### If you have a +PA+LNA module (SMA connector, screw-on antenna)
+
+The variants with an external antenna — HiLetgo and similar "nRF24L01+PA+LNA
+2.4G 1100m" modules — differ from the bare board in two ways that matter here.
+
+**Power.** The LNA is active during receive, so these draw substantially more
+current than a bare module (tens of mA rather than ~13 mA). Give it a
+**separate 3.3 V supply** — a small AMS1117 regulator module fed from the 5 V
+pin is the usual fix — and bump the decoupling to **100 µF**. Sharing ground
+with the Arduino is all the connection the supplies need.
+
+I could not confirm the UNO R4's 3V3 pin current rating from the official
+datasheet (the PDF's font subsetting defeats text extraction), so treat the
+separate supply as the default rather than something to try only after it
+misbehaves. The failure mode is not a clean error: a browning-out module
+answers SPI perfectly well and simply reports a quiet band.
+
+**Sensitivity — set `AEGIS_NRF_LNA_GAIN_DB`.** This is the part that silently
+produces wrong numbers if ignored. The RPD trips at roughly -64 dBm *at the
+chip's input*, but on a +LNA module the amplifier sits in front of the chip, so
+the real detection floor referred to the antenna is:
+
+```
+effective floor ≈ -64 dBm − LNA gain
+```
+
+At the ~20 dB typical of these modules that is about **-84 dBm** — around 100×
+more sensitive in power terms. The default in `config.h` is `20`; set it to `0`
+for a bare module. The firmware publishes the resulting floor in its `hello`
+record and the app prints it in the board strip, so the number on screen always
+matches the hardware rather than repeating a datasheet figure that does not
+apply.
+
+Expect a much busier band as a result. If nearly every channel reads high, the
+module is working — raise the app's occupancy floor rather than assuming a
+fault.
+
+**The PA is unused.** It only applies to transmit, and this firmware never
+transmits. The "1100 m" on the box is a TX range claim and has no bearing on
+scanning. Do still screw the antenna on before powering up — it costs nothing
+and avoids running the front end unterminated.
+
 ## Flashing
 
 ```bash
@@ -88,12 +130,13 @@ Web Serial needs Chrome, Edge or Opera — Firefox and Safari have not shipped i
 figures are genuine dBm.
 
 **Raw band sweep** is not a receiver. The nRF24's Received Power Detector is a
-one-bit comparator that latches when a channel exceeds roughly **-64 dBm**. The
-firmware parks on each 1 MHz channel, samples the RPD 48 times, and reports the
-hit count. So `41/48` means "carrier above -64 dBm on 85% of samples" — an
-occupancy figure, not a power measurement. The app maps occupancy onto the
-radar's dBm scale so these plot sensibly beside real RSSI readings, and labels
-them as occupancy so the distinction survives.
+one-bit comparator that latches when a channel exceeds the detection floor —
+roughly **-64 dBm** at the chip, or about **-84 dBm** at the antenna on a +LNA
+module (see above). The firmware parks on each 1 MHz channel, samples the RPD 48
+times, and reports the hit count. So `41/48` means "carrier above the floor on
+85% of samples" — an occupancy figure, not a power measurement. The app maps
+occupancy onto the radar's dBm scale so these plot sensibly beside real RSSI
+readings, and labels them as occupancy so the distinction survives.
 
 That limitation aside, this source sees things the other two cannot: Zigbee,
 wireless mice and keyboards, video senders, cordless phones, a microwave oven
@@ -151,6 +194,7 @@ Everything lives in `config.h`:
 
 | Setting | Default | Notes |
 | --- | --- | --- |
+| `AEGIS_NRF_LNA_GAIN_DB` | 20 | **Set this to match your module.** 20 for +PA+LNA, 0 for a bare nRF24L01+. Determines the reported detection floor. |
 | `AEGIS_RF_SAMPLES` | 48 | Samples per channel. Higher is smoother and slower. |
 | `AEGIS_RF_CHANNELS` | 126 | Full band. Drop to ~85 to skip above 2485 MHz. |
 | `AEGIS_BLE_SCAN_MS` | 4000 | BLE listen window. |
@@ -164,8 +208,8 @@ file):
 
 | Target | Flash | RAM |
 | --- | --- | --- |
-| `arduino:renesas_uno:unor4wifi` | 94,876 B (36%) | 9,908 B (30%) |
-| `arduino:renesas_uno:minima` | 55,360 B (21%) | 4,632 B (14%) |
+| `arduino:renesas_uno:unor4wifi` | 95,020 B (36%) | 9,908 B (30%) |
+| `arduino:renesas_uno:minima` | 55,496 B (21%) | 4,632 B (14%) |
 
 The host side — line framing across split serial chunks, JSON escaping,
 occupancy thresholding, channel-overlap maths — is tested against a mock port

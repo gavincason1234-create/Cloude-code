@@ -3,6 +3,7 @@ import { Radar } from './radar.js';
 import { ContactStore } from './store.js';
 import { CONNECTORS } from './connectors/index.js';
 import { installDevicePicker } from './picker.js';
+import { Spectrum } from './spectrum.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -20,6 +21,7 @@ const el = {
   statUptime: $('stat-uptime'),
   statState: $('stat-state'),
   consent: $('consent-banner'),
+  spectrumPanel: $('panel-spectrum'),
 };
 
 const store = new ContactStore();
@@ -49,7 +51,76 @@ const bus = {
   emit: (contact) => store.upsert(contact),
   drop: (id) => store.drop(id),
   log,
+  publish: (source, topic, payload) => handlePublish(source, topic, payload),
 };
+
+/* --------------------------------------------------------- spectrum --- */
+
+const spectrum = new Spectrum($('spectrum'));
+
+/** Non-contact data from connectors: spectrum frames and board status. */
+function handlePublish(source, topic, payload) {
+  if (source !== 'r4') return;
+
+  switch (topic) {
+    case 'board':
+      showSpectrumPanel(payload);
+      break;
+    case 'spectrum:configure':
+      spectrum.configure(payload);
+      break;
+    case 'spectrum:channel':
+      spectrum.setChannel(payload.channel, payload.occupancy);
+      break;
+    case 'spectrum:commit':
+      spectrum.commit();
+      break;
+    case 'sweep':
+      setBoardState(payload);
+      break;
+    default:
+      break;
+  }
+}
+
+function showSpectrumPanel(board) {
+  el.spectrumPanel.hidden = false;
+  spectrum.start();
+
+  $('board-name').textContent = board.board ?? 'unknown';
+  $('board-fw').textContent = board.fw ?? '—';
+  $('board-radio').textContent = board.radio ?? 'n/a';
+  $('board-caps').textContent = (board.caps ?? []).join(' · ') || 'none';
+  $('board-floor').textContent =
+    board.floorDbm != null
+      ? `${board.floorDbm} dBm${board.lna ? ` (+${board.lna} dB LNA)` : ''}`
+      : '—';
+
+  // A board with no nRF24 has nothing to plot; say so instead of showing an
+  // empty grid forever.
+  if (!(board.caps ?? []).includes('rf')) {
+    $('board-state').textContent = 'no nRF24';
+  }
+}
+
+function setBoardState({ state, src }) {
+  const node = $('board-state');
+  if (state === 'begin') {
+    node.textContent = 'sweeping';
+    node.classList.add('is-sweeping');
+  } else if (state === 'end') {
+    node.textContent = 'idle';
+    node.classList.remove('is-sweeping');
+  } else if (state === 'source') {
+    node.textContent = `${src} done`;
+  }
+}
+
+/** The R4 connector instance, once it exists — used by the panel controls. */
+function arduino() {
+  const entry = instances.get('r4');
+  return entry?.instance.active ? entry.instance : null;
+}
 
 /* ------------------------------------------------------------- 3D title --- */
 
@@ -156,6 +227,11 @@ async function toggleConnector(id) {
     button.classList.remove('is-stop');
     button.textContent = Ctor.action;
     log('info', `${Ctor.name} stopped`);
+    if (id === 'r4') {
+      spectrum.stop();
+      spectrum.clear();
+      el.spectrumPanel.hidden = true;
+    }
     refreshStats();
     scheduleRender();
     return;
@@ -310,6 +386,21 @@ function togglePressed(button, apply) {
   const next = button.getAttribute('aria-pressed') !== 'true';
   button.setAttribute('aria-pressed', String(next));
   apply(next);
+}
+
+/* Spectrum panel controls talk to the board over the connector's own writer. */
+
+$('btn-rf-scan').addEventListener('click', () => arduino()?.send('scan'));
+
+$('btn-rf-auto').addEventListener('click', (e) =>
+  togglePressed(e.currentTarget, (on) => arduino()?.send(`auto ${on ? 'on' : 'off'}`)));
+
+for (const [id, command] of [['btn-src-rf', 'rf'], ['btn-src-wifi', 'wifi'], ['btn-src-ble', 'ble']]) {
+  $(id).addEventListener('click', (e) =>
+    togglePressed(e.currentTarget, (on) => {
+      arduino()?.send(`${command} ${on ? 'on' : 'off'}`);
+      if (command === 'rf' && !on) spectrum.clear();
+    }));
 }
 
 $('btn-probe').addEventListener('click', () => {

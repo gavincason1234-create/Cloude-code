@@ -115,6 +115,16 @@ static void emitHello() {
 #else
   Serial.print(F("null"));
 #endif
+  // Publish the real detection floor so the UI never claims -64 dBm on a
+  // module whose LNA actually pulls it 20 dB lower.
+  Serial.print(F(",\"lna\":"));
+  Serial.print(AEGIS_NRF_LNA_GAIN_DB);
+  Serial.print(F(",\"floorDbm\":"));
+  Serial.print(-64 - AEGIS_NRF_LNA_GAIN_DB);
+  Serial.print(F(",\"channels\":"));
+  Serial.print(AEGIS_RF_CHANNELS);
+  Serial.print(F(",\"samples\":"));
+  Serial.print(AEGIS_RF_SAMPLES);
   Serial.println('}');
 }
 

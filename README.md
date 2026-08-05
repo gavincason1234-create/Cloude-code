@@ -92,6 +92,19 @@ rather than true power, and the app labels it as such.
 
 Receive only: the firmware never transmits, associates, or deauthenticates.
 
+Enabling it reveals a **2.4 GHz Spectrum** panel — occupancy bars with
+peak-hold over a scrolling waterfall, WiFi channels 1/6/11 marked behind them,
+plus board status and live source controls. The waterfall is what makes a
+hopping emitter legible: a device that changes channel every sweep draws a
+diagonal trail no single-frame view would show.
+
+If your module is a **+PA+LNA** type (SMA connector, screw-on antenna), set
+`AEGIS_NRF_LNA_GAIN_DB` to match. Its amplifier sits ahead of the chip, so the
+real detection floor is roughly `-64 dBm − LNA gain` — about -84 dBm rather than
+-64. The firmware reports the resulting floor and the panel displays it, so the
+figure on screen always describes your hardware. These modules also want a
+separate 3.3 V supply.
+
 Both board variants build from the same sketch — the Minima has no radio, so its
 build omits the WiFi and BLE sources automatically. Wiring, the 3.3 V and
 decoupling-cap gotchas, the serial protocol and the tuning knobs are all in
@@ -187,6 +200,7 @@ js/
   text3d.js             extruded 3D text renderer
   radar.js              canvas PPI radar
   store.js              in-memory contact store
+  spectrum.js           2.4 GHz occupancy bars + waterfall
   picker.js             device chooser overlay (desktop shell only)
   connectors/
     base.js             Connector contract and lifecycle helpers
