@@ -27,10 +27,30 @@ prompt.
 
 ## About WiFi scanning
 
-**No browser can enumerate nearby WiFi networks.** There is no SSID scanning
-API on the web platform, and there is not going to be one — it was rejected as
-a location-inference and fingerprinting vector. Any web app claiming to scan
-WiFi is either fabricating results or is not a web app.
+**No web page in any browser can enumerate nearby WiFi networks.** The
+[Network Information API](https://wicg.github.io/netinfo/) is the only spec that
+describes the connection at all, and its entire surface is `type`,
+`effectiveType`, `downlink`, `downlinkMax`, `rtt` and `saveData` — no SSID, no
+BSSID, no access point list, no scan method. Network identity is treated as
+sensitive under [W3C fingerprinting guidance](https://www.w3.org/TR/fingerprinting-guidance/),
+and SSIDs in particular leak [names, locations and occasionally passwords](https://link.springer.com/chapter/10.1007/978-3-031-09234-3_19).
+A web app that shows you a list of nearby networks is fabricating it.
+
+Three near-misses, none of which change the answer for a web page:
+
+- **`chrome.networking.onc`** does real scanning — `requestNetworkScan()`,
+  plus `SSID`, `BSSID`, `SignalStrength` and `Security` per network. It is
+  ChromeOS-only, restricted to extensions and auto-launched kiosk sessions, and
+  part of the Chrome Apps platform deprecated in 2020. Unreachable from a page.
+- **Firefox OS `WifiManager.getNetworks()`** did the same for certified apps.
+  That platform is archived.
+- **[Neighbour Awareness Networking](https://discourse.wicg.io/t/proposal-neighbour-awareness-networking-js-api/3478/)**
+  (Wi-Fi Aware) is an early WICG *draft proposal* for peer-to-peer device
+  discovery — not access point scanning. Not shipped in any browser.
+
+So the honest framing is that WiFi scanning was never specified for the web
+rather than formally rejected: it is deliberately outside what the netinfo spec
+chose to expose, and no vendor has shipped an equivalent.
 
 What the platform *does* expose is the properties of the link this device is
 already on, which is what the **Network Link** connector reports: bearer type
