@@ -64,8 +64,38 @@ already on, which is what the **Network Link** connector reports: bearer type
 transition between them. Real data, honestly labelled.
 
 For an actual airspace survey you need adapter access, which means leaving the
-browser — so the **WiFi Scan** connector delegates to the host OS through the
-desktop shell.
+browser. There are two ways out, and they answer different questions:
+
+- **WiFi Scan** delegates to the host OS through the desktop shell. Tells you
+  what *this machine's* adapter sees.
+- **Arduino 2.4 GHz Scanner** reads a stacked UNO R4 over Web Serial. Its own
+  radios report the band directly — and since Web Serial is a browser API, this
+  path needs no native shell at all. The plain browser build gets real RF
+  scanning after all.
+
+## Hardware scanning: the UNO R4
+
+`firmware/aegis_scanner/` turns a stacked Arduino UNO R4 into a 2.4 GHz scanner
+that streams newline-delimited JSON over USB. Three sources:
+
+| Source | Hardware | What it sees |
+| --- | --- | --- |
+| WiFi AP scan | ESP32-S3 (R4 WiFi) | SSID, BSSID, RSSI, channel, encryption |
+| BLE advertisements | ESP32-S3 (R4 WiFi) | Address, local name, RSSI |
+| Raw band sweep | stacked nRF24L01+ | Occupancy of all 126 × 1 MHz channels |
+
+The third one is why this is worth building. The nRF24 sees *everything*
+radiating in the band, including devices that never announce themselves —
+Zigbee, wireless peripherals, video senders, a leaky microwave. It is a carrier
+detector rather than a receiver, so it reports occupancy above roughly -64 dBm
+rather than true power, and the app labels it as such.
+
+Receive only: the firmware never transmits, associates, or deauthenticates.
+
+Both board variants build from the same sketch — the Minima has no radio, so its
+build omits the WiFi and BLE sources automatically. Wiring, the 3.3 V and
+decoupling-cap gotchas, the serial protocol and the tuning knobs are all in
+[`firmware/README.md`](firmware/README.md).
 
 ## The desktop shell
 
@@ -122,6 +152,7 @@ band, permission-denied output, and cross-parser record-shape agreement.
 
 | Connector | API | What it reports |
 | --- | --- | --- |
+| Arduino 2.4 GHz Scanner | Web Serial → UNO R4 | Access points, BLE advertisements and raw band occupancy, straight off the radio |
 | WiFi Scan | host OS via desktop shell | Nearby access points: SSID, BSSID, signal, channel, band, security, PHY mode |
 | Bluetooth LE Scan | `requestLEScan` | Nearby advertisements: name, RSSI, TX power, service UUIDs, manufacturer data |
 | Bluetooth Device Pair | `requestDevice` + GATT | Manufacturer, model, firmware, serial, battery of a device you pick |
@@ -159,6 +190,7 @@ js/
   picker.js             device chooser overlay (desktop shell only)
   connectors/
     base.js             Connector contract and lifecycle helpers
+    arduino.js          UNO R4 2.4 GHz scanner over Web Serial
     wifi.js             native WiFi scan via the desktop bridge
     bluetooth.js        LE advertisement scan, GATT device pairing
     network.js          link telemetry, local interface enumeration
@@ -171,6 +203,12 @@ native/
     index.js            platform dispatch, command execution, error codes
     parsers.js          pure nmcli / netsh / system_profiler parsers
     parsers.test.js     fixture-driven tests, no adapter required
+firmware/
+  aegis_scanner/
+    aegis_scanner.ino   UNO R4 sketch: WiFi + BLE + raw band sweep
+    nrf24.h             minimal nRF24L01+ carrier-detect driver
+    config.h            board detection, wiring, tuning
+  README.md             stacking, wiring, flashing, serial protocol
 ```
 
 ### The 3D text
