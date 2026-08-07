@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AEGIS 2.4 GHz Scanner — Wiring Diagram</title>
+<meta name="hz:slide-selector" content=".infographic">
+<meta name="hz:canvas-width" content="1587">
+<meta name="hz:canvas-height" content="1123">
+<link rel="stylesheet" href="https://use.typekit.net/tfz7eux.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #e8eaed;
+}
+
+.infographic {
+  position: relative;
+  width: 420mm;
+  height: 297mm;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* ---------- header ---------- */
+
+.masthead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 420mm;
+  height: 26mm;
+  background: #0f2233;
+  padding: 6mm 14mm;
+}
+
+.title {
+  font-family: "source-sans-3", sans-serif;
+  font-weight: 700;
+  font-size: 20pt;
+  letter-spacing: -0.2pt;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-family: "source-code-pro", monospace;
+  font-weight: 400;
+  font-size: 8.5pt;
+  letter-spacing: 1.4pt;
+  text-transform: uppercase;
+  color: #5eb8d0;
+  margin-top: 1.5mm;
+}
+
+.masthead-note {
+  position: absolute;
+  top: 8mm;
+  right: 14mm;
+  text-align: right;
+  font-family: "source-sans-3", sans-serif;
+  font-weight: 400;
+  font-size: 8.5pt;
+  line-height: 1.5;
+  color: #9fb3c4;
+}
+.masthead-note b {
+  font-family: "source-sans-3", sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* ---------- drawing ---------- */
+
+.drawing {
+  position: absolute;
+  top: 31mm;
+  left: 12mm;
+  width: 396mm;
+  height: 172mm;
+}
+.drawing svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- bottom band ---------- */
+
+.pintable {
+  position: absolute;
+  top: 212mm;
+  left: 12mm;
+  width: 202mm;
+}
+
+.band-title {
+  font-family: "source-code-pro", monospace;
+  font-weight: 600;
+  font-size: 7.5pt;
+  letter-spacing: 1.6pt;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 2mm;
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+th {
+  font-family: "source-code-pro", monospace;
+  font-weight: 600;
+  font-size: 7pt;
+  letter-spacing: 0.8pt;
+  text-transform: uppercase;
+  color: #64748b;
+  text-align: left;
+  padding: 1mm 2mm;
+  border-bottom: 0.5mm solid #0f2233;
+}
+
+td {
+  font-family: "source-code-pro", monospace;
+  font-weight: 400;
+  font-size: 8pt;
+  color: #111827;
+  padding: 1.25mm 2mm;
+  border-bottom: 0.18mm solid #dde3ea;
+}
+
+td.wire { width: 9mm; }
+td.role {
+  font-family: "source-sans-3", sans-serif;
+  font-weight: 400;
+  color: #64748b;
+}
+td.pin { font-weight: 600; }
+
+.swatch {
+  display: inline-block;
+  width: 5mm;
+  height: 2mm;
+  border-radius: 0.6mm;
+  vertical-align: middle;
+}
+
+/* ---------- callouts ---------- */
+
+.notes {
+  position: absolute;
+  top: 212mm;
+  left: 224mm;
+  width: 184mm;
+}
+
+/* Three columns rather than a stack: at this width a stacked list of the same
+   copy runs past the bottom of the canvas. */
+.note-row { display: flex; gap: 3mm; }
+
+.note {
+  flex: 1;
+  padding: 2.6mm 3mm 2.6mm 4mm;
+  background: #f6f8fa;
+  border-left: 1mm solid #c0392b;
+}
+.note:nth-child(2) { border-left-color: #b8860b; }
+.note:nth-child(3) { border-left-color: #0e7490; }
+
+.note-head {
+  font-family: "source-sans-3", sans-serif;
+  font-weight: 700;
+  font-size: 8.2pt;
+  line-height: 1.25;
+  color: #0f2233;
+  margin-bottom: 1mm;
+}
+
+.note-body {
+  font-family: "source-sans-3", sans-serif;
+  font-weight: 400;
+  font-size: 7.6pt;
+  line-height: 1.4;
+  color: #3f4d5c;
+}
+.note-body code {
+  font-family: "source-code-pro", monospace;
+  font-size: 7.4pt;
+  color: #0f2233;
+  background: #e6ebf0;
+  padding: 0 0.8mm;
+  border-radius: 0.5mm;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+  position: absolute;
+  bottom: 5mm;
+  left: 12mm;
+  width: 396mm;
+  display: flex;
+  justify-content: space-between;
+  font-family: "source-code-pro", monospace;
+  font-weight: 400;
+  font-size: 6.8pt;
+  letter-spacing: 0.7pt;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+</style>
+</head>
+<body>
+
+<div class="infographic" data-canvas-width="1587" data-canvas-height="1123">
+
+  <header class="masthead">
+    <h1 class="title">AEGIS 2.4 GHz Scanner</h1>
+    <p class="subtitle">Arduino UNO R4 &nbsp;+&nbsp; nRF24L01+PA+LNA &nbsp;·&nbsp; Wiring</p>
+    <p class="masthead-note">
+      <b>Receive only.</b> The firmware never transmits,<br>
+      associates or deauthenticates.
+    </p>
+  </header>
+
+  <div class="drawing">
+    <!-- viewBox is cropped to the drawn content; the full 0-520 box left a
+         dead band under the masthead. -->
+    <svg viewBox="0 86 1000 434" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <style>
+          .lbl   { font-family: "source-code-pro", monospace; font-weight: 600; font-size: 15px; }
+          .lbl-s { font-family: "source-code-pro", monospace; font-weight: 400; font-size: 12.5px; }
+          .cap   { font-family: "source-sans-3", sans-serif; font-weight: 400; font-size: 13px; fill: #64748b; }
+          .brd   { font-family: "source-sans-3", sans-serif; font-weight: 700; font-size: 17px; fill: #ffffff; }
+          .brd-s { font-family: "source-code-pro", monospace; font-weight: 400; font-size: 12px; fill: #93b4c4; }
+          .wire  { fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+        </style>
+      </defs>
+
+      <!-- ============ Arduino UNO R4 ============ -->
+      <rect x="60" y="100" width="280" height="280" rx="10" fill="#0d5c63"/>
+      <rect x="60" y="100" width="280" height="280" rx="10" fill="none" stroke="#08383d" stroke-width="2"/>
+      <!-- USB-C -->
+      <rect x="44" y="130" width="20" height="34" rx="4" fill="#b8c4cc"/>
+      <text class="cap" x="30" y="182" text-anchor="middle" fill="#94a3b8">USB</text>
+
+      <text class="brd" x="200" y="140" text-anchor="middle">Arduino UNO R4</text>
+      <text class="brd-s" x="200" y="160" text-anchor="middle">WiFi or Minima</text>
+
+      <!-- header strip -->
+      <rect x="316" y="112" width="16" height="256" rx="3" fill="#0a4249"/>
+
+      <!-- ============ nRF24L01+PA+LNA ============ -->
+      <rect x="700" y="100" width="200" height="280" rx="10" fill="#16325c"/>
+      <rect x="700" y="100" width="200" height="280" rx="10" fill="none" stroke="#0d2144" stroke-width="2"/>
+      <rect x="708" y="112" width="16" height="256" rx="3" fill="#0f2549"/>
+
+      <text class="brd" x="812" y="150" text-anchor="middle">nRF24L01+</text>
+      <text class="brd" x="812" y="170" text-anchor="middle">PA + LNA</text>
+      <text class="brd-s" x="812" y="196" text-anchor="middle">IRQ — not connected</text>
+
+      <!-- RF shield can -->
+      <rect x="754" y="212" width="116" height="60" rx="4" fill="#8a97a6"/>
+      <rect x="754" y="212" width="116" height="60" rx="4" fill="none" stroke="#6b7885" stroke-width="1.5"/>
+      <!-- style, not a fill attribute: the .brd-s class rule would win over one -->
+      <text class="brd-s" x="812" y="248" text-anchor="middle" style="fill:#2b3947">RF SHIELD</text>
+
+      <!-- SMA connector + antenna -->
+      <rect x="900" y="228" width="26" height="28" rx="3" fill="#c9a227"/>
+      <rect x="926" y="238" width="10" height="8" fill="#8a97a6"/>
+      <path d="M936 242 L992 196" stroke="#1f2937" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="992" cy="196" r="5" fill="#1f2937"/>
+      <text class="cap" x="946" y="176" text-anchor="middle">SMA</text>
+      <text class="cap" x="946" y="192" text-anchor="middle">antenna</text>
+
+      <!-- ============ signal wires (straight, no crossings) ============ -->
+      <!-- D9 → CE -->
+      <path class="wire" d="M332 135 H708" stroke="#e07b00"/>
+      <!-- D10 → CSN -->
+      <path class="wire" d="M332 170 H708" stroke="#b8860b"/>
+      <!-- D13 → SCK -->
+      <path class="wire" d="M332 205 H708" stroke="#2e7d32"/>
+      <!-- D11 → MOSI -->
+      <path class="wire" d="M332 240 H708" stroke="#1565c0"/>
+      <!-- D12 → MISO -->
+      <path class="wire" d="M332 275 H708" stroke="#6a1b9a"/>
+      <!-- GND -->
+      <path class="wire" d="M332 310 H708" stroke="#1f2937"/>
+
+      <!-- ============ 3V3 supply path: 5V → regulator → VCC ============ -->
+      <path class="wire" d="M332 345 H372 V440 H430" stroke="#c0392b"/>
+      <path class="wire" d="M570 440 H640 V345 H708" stroke="#c0392b"/>
+
+      <!-- regulator -->
+      <rect x="430" y="412" width="140" height="56" rx="6" fill="#f3f4f6" stroke="#94a3b8" stroke-width="2"/>
+      <text class="lbl" x="500" y="436" text-anchor="middle" fill="#0f2233">AMS1117-3.3</text>
+      <text class="lbl-s" x="500" y="455" text-anchor="middle" fill="#64748b">5V IN → 3V3 OUT</text>
+      <!-- regulator ground symbol -->
+      <path d="M500 468 V492" stroke="#1f2937" stroke-width="3"/>
+      <path d="M488 492 H512 M492 498 H508 M496 504 H504" stroke="#1f2937" stroke-width="3" stroke-linecap="round"/>
+      <text class="cap" x="524" y="502" text-anchor="start">common GND</text>
+
+      <!-- ============ decoupling capacitor across VCC / GND ============ -->
+      <path d="M664 310 V322 M664 336 V345" stroke="#1f2937" stroke-width="2.4"/>
+      <path d="M654 323 H674 M654 335 H674" stroke="#1f2937" stroke-width="3.4" stroke-linecap="round"/>
+      <circle cx="664" cy="310" r="4.5" fill="#1f2937"/>
+      <circle cx="664" cy="345" r="4.5" fill="#c0392b"/>
+      <text class="lbl-s" x="664" y="374" text-anchor="middle" fill="#0f2233">100 µF</text>
+
+      <!-- ============ pin pads and labels ============ -->
+      <!-- Arduino side -->
+      <g>
+        <rect x="326" y="128" width="14" height="14" rx="2" fill="#e07b00"/>
+        <text class="lbl" x="316" y="140" text-anchor="end" fill="#ffffff">D9</text>
+        <rect x="326" y="163" width="14" height="14" rx="2" fill="#b8860b"/>
+        <text class="lbl" x="316" y="175" text-anchor="end" fill="#ffffff">D10</text>
+        <rect x="326" y="198" width="14" height="14" rx="2" fill="#2e7d32"/>
+        <text class="lbl" x="316" y="210" text-anchor="end" fill="#ffffff">D13</text>
+        <rect x="326" y="233" width="14" height="14" rx="2" fill="#1565c0"/>
+        <text class="lbl" x="316" y="245" text-anchor="end" fill="#ffffff">D11</text>
+        <rect x="326" y="268" width="14" height="14" rx="2" fill="#6a1b9a"/>
+        <text class="lbl" x="316" y="280" text-anchor="end" fill="#ffffff">D12</text>
+        <rect x="326" y="303" width="14" height="14" rx="2" fill="#1f2937"/>
+        <text class="lbl" x="316" y="315" text-anchor="end" fill="#ffffff">GND</text>
+        <rect x="326" y="338" width="14" height="14" rx="2" fill="#c0392b"/>
+        <text class="lbl" x="316" y="350" text-anchor="end" fill="#ffffff">5V</text>
+      </g>
+
+      <!-- nRF24 side -->
+      <g>
+        <rect x="700" y="128" width="14" height="14" rx="2" fill="#e07b00"/>
+        <text class="lbl" x="726" y="140" text-anchor="start" fill="#ffffff">CE</text>
+        <rect x="700" y="163" width="14" height="14" rx="2" fill="#b8860b"/>
+        <text class="lbl" x="726" y="175" text-anchor="start" fill="#ffffff">CSN</text>
+        <rect x="700" y="198" width="14" height="14" rx="2" fill="#2e7d32"/>
+        <text class="lbl" x="726" y="210" text-anchor="start" fill="#ffffff">SCK</text>
+        <rect x="700" y="233" width="14" height="14" rx="2" fill="#1565c0"/>
+        <text class="lbl" x="726" y="245" text-anchor="start" fill="#ffffff">MOSI</text>
+        <rect x="700" y="268" width="14" height="14" rx="2" fill="#6a1b9a"/>
+        <text class="lbl" x="726" y="280" text-anchor="start" fill="#ffffff">MISO</text>
+        <rect x="700" y="303" width="14" height="14" rx="2" fill="#1f2937"/>
+        <text class="lbl" x="726" y="315" text-anchor="start" fill="#ffffff">GND</text>
+        <rect x="700" y="338" width="14" height="14" rx="2" fill="#c0392b"/>
+        <text class="lbl" x="726" y="350" text-anchor="start" fill="#ffffff">VCC</text>
+      </g>
+
+      <!-- ============ physical header inset ============ -->
+      <g transform="translate(96,392)">
+        <rect x="0" y="0" width="196" height="120" rx="6" fill="#f6f8fa" stroke="#cbd5e1" stroke-width="1.6"/>
+        <text class="cap" x="10" y="19" fill="#0f2233">Module header, viewed from above</text>
+        <text class="cap" x="10" y="35" fill="#94a3b8">Pin 1 pad is square</text>
+
+        <!-- pin 1 drawn square, as it is on the board -->
+        <rect x="12" y="46" width="13" height="13" fill="#1f2937"/>
+        <rect x="52" y="46" width="13" height="13" rx="2" fill="#c0392b"/>
+        <rect x="12" y="66" width="13" height="13" rx="2" fill="#e07b00"/>
+        <rect x="52" y="66" width="13" height="13" rx="2" fill="#b8860b"/>
+        <rect x="12" y="86" width="13" height="13" rx="2" fill="#2e7d32"/>
+        <rect x="52" y="86" width="13" height="13" rx="2" fill="#1565c0"/>
+        <rect x="12" y="106" width="13" height="13" rx="2" fill="#6a1b9a"/>
+        <rect x="52" y="106" width="13" height="13" rx="2" fill="#94a3b8"/>
+
+        <text class="lbl-s" x="74" y="57" fill="#0f2233">1 GND    2 VCC</text>
+        <text class="lbl-s" x="74" y="77" fill="#0f2233">3 CE     4 CSN</text>
+        <text class="lbl-s" x="74" y="97" fill="#0f2233">5 SCK    6 MOSI</text>
+        <text class="lbl-s" x="74" y="117" fill="#0f2233">7 MISO   8 IRQ</text>
+      </g>
+    </svg>
+  </div>
+
+  <section class="pintable">
+    <p class="band-title">Connections</p>
+    <table>
+      <thead>
+        <tr><th></th><th>UNO R4</th><th>nRF24</th><th>Pin</th><th>Role</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="wire"><i class="swatch" style="background:#c0392b"></i></td><td class="pin">5V → reg</td><td class="pin">VCC</td><td>2</td><td class="role">3.3 V supply</td></tr>
+        <tr><td class="wire"><i class="swatch" style="background:#1f2937"></i></td><td class="pin">GND</td><td class="pin">GND</td><td>1</td><td class="role">Common ground</td></tr>
+        <tr><td class="wire"><i class="swatch" style="background:#e07b00"></i></td><td class="pin">D9</td><td class="pin">CE</td><td>3</td><td class="role">Chip enable</td></tr>
+        <tr><td class="wire"><i class="swatch" style="background:#b8860b"></i></td><td class="pin">D10</td><td class="pin">CSN</td><td>4</td><td class="role">SPI chip select</td></tr>
+        <tr><td class="wire"><i class="swatch" style="background:#2e7d32"></i></td><td class="pin">D13</td><td class="pin">SCK</td><td>5</td><td class="role">SPI clock</td></tr>
+        <tr><td class="wire"><i class="swatch" style="background:#1565c0"></i></td><td class="pin">D11</td><td class="pin">MOSI</td><td>6</td><td class="role">Controller out</td></tr>
+        <tr><td class="wire"><i class="swatch" style="background:#6a1b9a"></i></td><td class="pin">D12</td><td class="pin">MISO</td><td>7</td><td class="role">Controller in</td></tr>
+        <tr><td class="wire"><i class="swatch" style="background:#94a3b8"></i></td><td class="pin">—</td><td class="pin">IRQ</td><td>8</td><td class="role">Unused, leave open</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="notes">
+    <p class="band-title">Before you power it</p>
+
+    <div class="note-row">
+      <div class="note">
+        <p class="note-head">3.3 V, and its own regulator</p>
+        <p class="note-body">
+          Supply range is 1.9–3.6 V. The LNA is active in receive and draws far more than a
+          bare module, so feed it from an AMS1117-3.3 off the 5 V pin, not the board's 3V3.
+          Signal lines are 5 V tolerant — no level shifter needed.
+        </p>
+      </div>
+
+      <div class="note">
+        <p class="note-head">100 µF at the module</p>
+        <p class="note-body">
+          Fit the cap across VCC and GND at the module pins, not at the regulator. Missing
+          decoupling is the most common cause of "it reads all zeros" — a browning-out module
+          still answers SPI and simply reports a quiet band.
+        </p>
+      </div>
+
+      <div class="note">
+        <p class="note-head">Set the LNA gain in firmware</p>
+        <p class="note-body">
+          The RPD trips near −64 dBm <i>at the chip</i>, but the LNA sits ahead of it, so the
+          real floor is about −84 dBm. Set <code>AEGIS_NRF_LNA_GAIN_DB</code> to <code>20</code>
+          here, <code>0</code> for a bare module.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer">
+    <span>firmware/aegis_scanner · config.h</span>
+    <span>SPI @ 10 MHz · CE D9 · CSN D10</span>
+    <span>126 × 1 MHz channels · 2400–2525 MHz</span>
+  </p>
+
+</div>
+
+</body>
+</html>
