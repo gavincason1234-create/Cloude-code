@@ -106,9 +106,14 @@ figure on screen always describes your hardware. These modules also want a
 separate 3.3 V supply.
 
 Both board variants build from the same sketch — the Minima has no radio, so its
-build omits the WiFi and BLE sources automatically. Wiring, the 3.3 V and
-decoupling-cap gotchas, the serial protocol and the tuning knobs are all in
-[`firmware/README.md`](firmware/README.md).
+build omits the WiFi and BLE sources automatically.
+
+![Wiring diagram](docs/wiring-diagram.png)
+
+Pin-for-pin wiring, the 3.3 V and decoupling gotchas, the serial protocol and the
+tuning knobs are all in [`firmware/README.md`](firmware/README.md). The diagram
+above is generated from [`docs/wiring-diagram.html`](docs/wiring-diagram.html) —
+A3 landscape, printable.
 
 ## The desktop shell
 

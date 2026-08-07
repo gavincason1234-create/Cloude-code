@@ -37,6 +37,11 @@ the Minima build simply omits the radio sources (55 KB vs 95 KB of flash).
 
 ## Wiring the nRF24L01+
 
+![AEGIS wiring diagram](../docs/wiring-diagram.png)
+
+*Full-size source: [`docs/wiring-diagram.html`](../docs/wiring-diagram.html) — open it in a
+browser and print to A3 landscape.*
+
 ```
 nRF24L01+        UNO R4
 ─────────        ──────
@@ -47,6 +52,7 @@ CSN        →     D10
 SCK        →     D13
 MOSI       →     D11
 MISO       →     D12
+IRQ        →     (leave open — unused)
 ```
 
 The module's **digital inputs are 5 V tolerant**, so the signal lines need no
