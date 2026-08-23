@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AEGIS — Consent-Based Device Scanner</title>
+<meta name="description" content="A permission-gated device scanner built on standard Web APIs: Bluetooth, network telemetry, USB, HID, Serial, sensors.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <canvas id="logo3d" width="640" height="160" aria-label="AEGIS"></canvas>
+    <p class="tagline">Consent-Based Device Scanner<span class="sep">/</span><span class="ver">v1.0</span></p>
+  </div>
+
+  <div class="status-cluster">
+    <div class="stat">
+      <span class="stat-label">Contacts</span>
+      <span class="stat-value" id="stat-contacts">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Connectors</span>
+      <span class="stat-value" id="stat-connectors">0<span class="dim">/0</span></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Uptime</span>
+      <span class="stat-value" id="stat-uptime">00:00</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">State</span>
+      <span class="stat-value" id="stat-state">IDLE</span>
+    </div>
+  </div>
+</header>
+
+<div class="consent" id="consent-banner">
+  <strong>Lawful-use notice.</strong>
+  Every module here is gated behind an explicit browser permission prompt and a user gesture.
+  This tool observes only what your own device is authorised to see — it does not intercept traffic,
+  capture packets, or monitor hardware you have not personally granted access to.
+  <button class="consent-dismiss" id="consent-dismiss" type="button">Acknowledge</button>
+</div>
+
+<main class="layout">
+
+  <section class="panel panel-radar">
+    <div class="panel-head">
+      <h2>Spatial Plot</h2>
+      <div class="panel-tools">
+        <button class="chip" id="btn-sweep" type="button" aria-pressed="true">Sweep</button>
+        <button class="chip" id="btn-labels" type="button" aria-pressed="true">Labels</button>
+        <button class="chip" id="btn-trails" type="button" aria-pressed="true">Trails</button>
+      </div>
+    </div>
+    <div class="radar-wrap">
+      <canvas id="radar" role="img" aria-label="Radar plot of detected devices"></canvas>
+      <div class="radar-readout" id="radar-readout" hidden></div>
+      <div class="radar-legend">
+        <span><i class="dot dot-ble"></i>Bluetooth</span>
+        <span><i class="dot dot-net"></i>Network</span>
+        <span><i class="dot dot-usb"></i>Wired</span>
+        <span><i class="dot dot-env"></i>Environment</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel panel-connectors">
+    <div class="panel-head">
+      <h2>Connectors</h2>
+      <button class="chip chip-accent" id="btn-probe" type="button">Probe support</button>
+    </div>
+    <ul class="connector-list" id="connector-list"></ul>
+  </section>
+
+  <section class="panel panel-spectrum" id="panel-spectrum" hidden>
+    <div class="panel-head">
+      <h2>2.4 GHz Spectrum</h2>
+      <div class="panel-tools">
+        <button class="chip chip-accent" id="btn-rf-scan" type="button">Scan now</button>
+        <button class="chip" id="btn-rf-auto" type="button" aria-pressed="true">Auto</button>
+        <span class="tool-sep" aria-hidden="true"></span>
+        <button class="chip" id="btn-src-rf" type="button" aria-pressed="true">RF</button>
+        <button class="chip" id="btn-src-wifi" type="button" aria-pressed="true">WiFi</button>
+        <button class="chip" id="btn-src-ble" type="button" aria-pressed="true">BLE</button>
+      </div>
+    </div>
+
+    <div class="board-strip" id="board-strip">
+      <span class="board-item"><b>Board</b><span id="board-name">—</span></span>
+      <span class="board-item"><b>Firmware</b><span id="board-fw">—</span></span>
+      <span class="board-item"><b>Radio</b><span id="board-radio">—</span></span>
+      <span class="board-item"><b>Sources</b><span id="board-caps">—</span></span>
+      <span class="board-item"><b>Floor</b><span id="board-floor">—</span></span>
+      <span class="board-state" id="board-state">idle</span>
+    </div>
+
+    <div class="spectrum-wrap">
+      <canvas id="spectrum" role="img" aria-label="2.4 GHz spectrum occupancy and waterfall"></canvas>
+    </div>
+  </section>
+
+  <section class="panel panel-contacts">
+    <div class="panel-head">
+      <h2>Contacts</h2>
+      <div class="panel-tools">
+        <input class="filter" id="filter" type="search" placeholder="Filter by name, id, source…" aria-label="Filter contacts">
+        <button class="chip" id="btn-export" type="button">Export JSON</button>
+        <button class="chip chip-danger" id="btn-clear" type="button">Clear</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="contacts">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Source</th>
+            <th scope="col">Identifier</th>
+            <th scope="col">Signal</th>
+            <th scope="col">Detail</th>
+            <th scope="col">Seen</th>
+          </tr>
+        </thead>
+        <tbody id="contacts-body"></tbody>
+      </table>
+      <p class="empty" id="contacts-empty">No contacts yet. Enable a connector to begin.</p>
+    </div>
+  </section>
+
+  <section class="panel panel-log">
+    <div class="panel-head">
+      <h2>Event Log</h2>
+      <button class="chip" id="btn-log-clear" type="button">Clear</button>
+    </div>
+    <ol class="log" id="log" aria-live="polite"></ol>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <span>All access is permission-gated. Nothing leaves this browser — no network calls, no telemetry.</span>
+</footer>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
