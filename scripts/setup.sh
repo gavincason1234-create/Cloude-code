@@ -5,7 +5,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BASE_DIR="$REPO_ROOT/base_firmware"
 
-echo "[+] JARVIS Suite — Environment Setup"
+echo "[+] Facts Lab Suite — Environment Setup"
 
 # ── Dependencies ──────────────────────────────────────────────────────────────
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then

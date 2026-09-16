@@ -1,4 +1,4 @@
-# JARVIS — Flipper Zero Cybersecurity Suite
+# Facts Lab — Flipper Zero Cybersecurity Suite
 
 Custom FAP application suite for Flipper Zero targeting offensive security research.
 Designed for use with the ESP32-S2 Wi-Fi Developer Board and External CC1101 SubGhz Antenna.
@@ -13,7 +13,7 @@ Designed for use with the ESP32-S2 Wi-Fi Developer Board and External CC1101 Sub
 
 ## Applications
 
-### `jarvis_suite` — Hub
+### `facts_lab_suite` — Hub
 Central launcher and status monitor. Shows live connectivity to ESP32 and external CC1101.
 Coordinates logging and launches all sub-modules.
 
@@ -33,7 +33,7 @@ Uses the external GPIO CC1101 for extended range and sensitivity.
 - Replay with adjustable delay/repeat
 - Rolling code analysis and bruteforce (static code only)
 
-## ESP32-S2 Firmware (`jarvis_wifi`)
+## ESP32-S2 Firmware (`facts_lab_wifi`)
 Custom firmware for the ESP32-S2 board.
 JSON command protocol over UART at 115200 baud.
 Adds credential harvesting captive portal and PMKID export not in stock Marauder.

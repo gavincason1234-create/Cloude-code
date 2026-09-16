@@ -1,5 +1,5 @@
 /*
- * JARVIS WiFi — ESP32-S2 Firmware
+ * Facts Lab WiFi — ESP32-S2 Firmware
  * For use with the Flipper Zero Wi-Fi Developer Board (ESP32-S2)
  *
  * Board: "Adafruit Feather ESP32-S2" or "ESP32-S2 Dev Module"

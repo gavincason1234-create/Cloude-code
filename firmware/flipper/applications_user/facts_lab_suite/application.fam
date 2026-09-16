@@ -1,8 +1,8 @@
 App(
-    appid="jarvis_suite",
-    name="JARVIS Suite",
+    appid="facts_lab_suite",
+    name="Facts Lab Suite",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="jarvis_suite_app",
+    entry_point="facts_lab_suite_app",
     requires=["gui", "storage", "notification", "loader"],
     stack_size=4 * 1024,
     fap_category="Tools",

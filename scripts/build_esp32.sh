@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SKETCH="$REPO_ROOT/firmware/esp32s2/jarvis_wifi/jarvis_wifi.ino"
+SKETCH="$REPO_ROOT/firmware/esp32s2/facts_lab_wifi/facts_lab_wifi.ino"
 DIST_DIR="$REPO_ROOT/dist/esp32s2"
 ARDUINO_CLI="$HOME/.local/bin/arduino-cli"
 
@@ -12,7 +12,7 @@ mkdir -p "$DIST_DIR"
 BOARD="esp32:esp32:esp32s2"
 BUILD_PROPS="UploadSpeed=921600,FlashFreq=80,FlashMode=dio"
 
-echo "[+] Building ESP32-S2 firmware: jarvis_wifi"
+echo "[+] Building ESP32-S2 firmware: facts_lab_wifi"
 
 if [[ ! -f "$ARDUINO_CLI" ]]; then
     echo "[!] arduino-cli not found. Run ./scripts/setup.sh first."
@@ -28,13 +28,13 @@ fi
 
 echo ""
 echo "[+] Build complete!"
-echo "    Firmware: $DIST_DIR/jarvis_wifi.ino.bin"
+echo "    Firmware: $DIST_DIR/facts_lab_wifi.ino.bin"
 echo ""
 echo "    To flash (replace /dev/ttyUSB0 with your port):"
 echo "      $ARDUINO_CLI upload --fqbn $BOARD --port /dev/ttyUSB0 $SKETCH"
 echo ""
 echo "    Or flash the .bin directly:"
-echo "      esptool.py --chip esp32s2 --port /dev/ttyUSB0 write_flash 0x0 $DIST_DIR/jarvis_wifi.ino.bin"
+echo "      esptool.py --chip esp32s2 --port /dev/ttyUSB0 write_flash 0x0 $DIST_DIR/facts_lab_wifi.ino.bin"
 echo ""
 
 # Auto-flash if --flash argument provided

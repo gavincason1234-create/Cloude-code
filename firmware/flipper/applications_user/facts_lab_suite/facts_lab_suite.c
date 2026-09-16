@@ -12,9 +12,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#define TAG          "JarvisSuite"
-#define JARVIS_DIR   "/ext/jarvis"
-#define LOG_PATH     JARVIS_DIR "/session.log"
+#define TAG          "FactsLabSuite"
+#define Facts Lab_DIR   "/ext/facts_lab"
+#define LOG_PATH     Facts Lab_DIR "/session.log"
 
 typedef enum {
     ViewMenu = 0,
@@ -49,7 +49,7 @@ typedef struct {
     uint8_t log_count;
 
     char status_buf[512];
-} JarvisApp;
+} FactsLabApp;
 
 // ─── Status check: ping ESP32 over UART ──────────────────────────────────────
 
@@ -87,11 +87,11 @@ static bool check_esp32(void) {
 // ─── Status draw ─────────────────────────────────────────────────────────────
 
 static void status_draw_cb(Canvas* canvas, void* ctx) {
-    JarvisApp* app = (JarvisApp*)ctx;
+    FactsLabApp* app = (FactsLabApp*)ctx;
     canvas_clear(canvas);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 10, "JARVIS — System Status");
+    canvas_draw_str(canvas, 0, 10, "Facts Lab — System Status");
 
     canvas_set_font(canvas, FontSecondary);
 
@@ -104,7 +104,7 @@ static void status_draw_cb(Canvas* canvas, void* ctx) {
         app->ext_cc1101_ok ? "OK" : "Not detected");
     canvas_draw_str(canvas, 2, 34, line);
 
-    snprintf(line, sizeof(line), "Log dir:        " JARVIS_DIR);
+    snprintf(line, sizeof(line), "Log dir:        " Facts Lab_DIR);
     canvas_draw_str(canvas, 2, 44, line);
 
     canvas_draw_str(canvas, 2, 56, "Back=Menu");
@@ -112,7 +112,7 @@ static void status_draw_cb(Canvas* canvas, void* ctx) {
 
 // ─── App launch helper ────────────────────────────────────────────────────────
 
-static void launch_app(JarvisApp* app, const char* app_id) {
+static void launch_app(FactsLabApp* app, const char* app_id) {
     // Use loader to launch FAP by app ID
     LoaderStatus status = loader_start_with_gui_error(app->loader, app_id, NULL);
     if(status != LoaderStatusOk) {
@@ -126,7 +126,7 @@ static void launch_app(JarvisApp* app, const char* app_id) {
 
 // ─── Log append ───────────────────────────────────────────────────────────────
 
-static void log_event(JarvisApp* app, const char* msg) {
+static void log_event(FactsLabApp* app, const char* msg) {
     File* f = storage_file_alloc(app->storage);
     if(storage_file_open(f, LOG_PATH, FSAM_WRITE, FSOM_OPEN_APPEND)) {
         storage_file_write(f, msg, strlen(msg));
@@ -140,7 +140,7 @@ static void log_event(JarvisApp* app, const char* msg) {
 // ─── Menu callback ────────────────────────────────────────────────────────────
 
 static void menu_cb(void* ctx, uint32_t index) {
-    JarvisApp* app = (JarvisApp*)ctx;
+    FactsLabApp* app = (FactsLabApp*)ctx;
 
     switch((JarvisMenuItem)index) {
     case MenuWiFiArsenal:
@@ -197,15 +197,15 @@ static uint32_t exit_app(void* ctx) {
 
 // ─── Init / free ─────────────────────────────────────────────────────────────
 
-static JarvisApp* jarvis_alloc(void) {
-    JarvisApp* app = malloc(sizeof(JarvisApp));
+static FactsLabApp* facts_lab_alloc(void) {
+    FactsLabApp* app = malloc(sizeof(FactsLabApp));
     furi_assert(app);
-    memset(app, 0, sizeof(JarvisApp));
+    memset(app, 0, sizeof(FactsLabApp));
 
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
     app->storage = furi_record_open(RECORD_STORAGE);
     app->loader = furi_record_open(RECORD_LOADER);
-    storage_simply_mkdir(app->storage, JARVIS_DIR);
+    storage_simply_mkdir(app->storage, Facts Lab_DIR);
 
     app->gui = furi_record_open(RECORD_GUI);
     app->view_dispatcher = view_dispatcher_alloc();
@@ -239,11 +239,11 @@ static JarvisApp* jarvis_alloc(void) {
     // Quick ESP32 check on startup
     app->esp32_ok = check_esp32();
 
-    log_event(app, "--- JARVIS Suite started ---");
+    log_event(app, "--- Facts Lab Suite started ---");
     return app;
 }
 
-static void jarvis_free(JarvisApp* app) {
+static void facts_lab_free(FactsLabApp* app) {
     furi_assert(app);
 
     view_dispatcher_remove_view(app->view_dispatcher, ViewMenu);
@@ -262,11 +262,11 @@ static void jarvis_free(JarvisApp* app) {
     free(app);
 }
 
-int32_t jarvis_suite_app(void* p) {
+int32_t facts_lab_suite_app(void* p) {
     UNUSED(p);
-    JarvisApp* app = jarvis_alloc();
+    FactsLabApp* app = facts_lab_alloc();
     view_dispatcher_switch_to_view(app->view_dispatcher, ViewMenu);
     view_dispatcher_run(app->view_dispatcher);
-    jarvis_free(app);
+    facts_lab_free(app);
     return 0;
 }

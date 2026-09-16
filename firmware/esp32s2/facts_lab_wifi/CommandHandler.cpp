@@ -69,7 +69,7 @@ void CommandHandler::send_error(const char* msg) {
 // ─── Command handlers ─────────────────────────────────────────────────────────
 
 void CommandHandler::cmd_ping() {
-    send_json("{\"status\":\"ready\",\"fw\":\"jarvis_wifi_v1\"}");
+    send_json("{\"status\":\"ready\",\"fw\":\"facts_lab_wifi_v1\"}");
 }
 
 void CommandHandler::cmd_scan() {
@@ -269,7 +269,7 @@ void CommandHandler::begin() {
     WiFi.mode(WIFI_STA);
     // Send ready beacon so Flipper knows we're alive
     delay(500);
-    send_json("{\"status\":\"ready\",\"fw\":\"jarvis_wifi_v1\"}");
+    send_json("{\"status\":\"ready\",\"fw\":\"facts_lab_wifi_v1\"}");
 }
 
 void CommandHandler::loop() {

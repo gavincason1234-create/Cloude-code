@@ -11,7 +11,7 @@ mkdir -p "$DIST_DIR"
 echo "[+] Building Flipper FAP applications..."
 
 APPS=(
-    "jarvis_suite"
+    "facts_lab_suite"
     "wifi_arsenal"
     "rf_recon"
 )
