@@ -1,0 +1,11 @@
+App(
+    appid="jarvis_suite",
+    name="JARVIS Suite",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="jarvis_suite_app",
+    requires=["gui", "storage", "notification", "loader"],
+    stack_size=4 * 1024,
+    fap_category="Tools",
+    fap_version=(1, 0),
+    fap_description="Cybersecurity hub: WiFi, SubGhz, NFC, IR, BadUSB",
+)
