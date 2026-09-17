@@ -1,0 +1,11 @@
+App(
+    appid="wifi_arsenal",
+    name="WiFi Arsenal",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="wifi_arsenal_app",
+    requires=["gui", "storage", "notification"],
+    stack_size=4 * 1024,
+    fap_category="GPIO",
+    fap_version=(1, 0),
+    fap_description="Wi-Fi attack toolkit via ESP32-S2 dev board",
+)

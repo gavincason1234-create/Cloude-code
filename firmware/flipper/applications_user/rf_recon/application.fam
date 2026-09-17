@@ -1,0 +1,11 @@
+App(
+    appid="rf_recon",
+    name="RF Recon",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rf_recon_app",
+    requires=["gui", "storage", "notification", "subghz"],
+    stack_size=4 * 1024,
+    fap_category="Sub-GHz",
+    fap_version=(1, 0),
+    fap_description="Wideband Sub-GHz recon with external CC1101 support",
+)
