@@ -21,7 +21,7 @@ test.describe("owner dashboard", () => {
     await page.goto("/admin");
     await expect(page).toHaveURL(/\/account/);
     // Scoped to <main>: Next.js's route announcer is also role="alert".
-    await expect(page.locator("main").getByRole("alert")).toContainText(/isn['’]t on the owner list/i);
+    await expect(page.locator("main").getByRole("alert")).toContainText(/isn['’]t set up as an owner/i);
   });
 
   test("owner sign-in lands on Tonight", async ({ page }) => {

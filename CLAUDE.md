@@ -67,6 +67,11 @@ which means:
   Hess (past due), two approved reviews and one unapproved "Porta-potty" review.
 - **"Clear everything"** wipes bookings/members/payments/reviews/log — **not settings**. A test that
   changes a price or a gate code must put it back (see `admin.spec.ts`).
+- **Confirm boxes.** Destructive buttons (driver cancels, owner's Pulled out / Mark paid / Hide /
+  Cancel & refund / Clear everything) open a `window.confirm`. Call `acceptDialogs(page)` before
+  clicking them or the click is a no-op.
+- **Sample data** is refused on a production Vercel deployment with a real database; in memory mode it
+  always loads. Its booking codes are random each load, so never hard-code them in a test.
 
 ## Layout
 

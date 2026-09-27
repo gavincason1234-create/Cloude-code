@@ -1,4 +1,4 @@
-import { cardWith, expect, reserveNightly, signInAs, test, whoAmI } from "./helpers";
+import { acceptDialogs, cardWith, expect, reserveNightly, signInAs, test, whoAmI } from "./helpers";
 
 /**
  * A signed-in driver: their bookings under /account, cancelling for a full refund, signing out.
@@ -22,7 +22,8 @@ test.describe("driver account", () => {
     await expect(card).toContainText(/reserved/i);
     await expect(card.getByRole("link", { name: /codes|receipt/i })).toBeVisible();
 
-    // Cancel → full refund → the card and a flash both say cancelled.
+    // Cancel → confirm box → full refund → the card and a flash both say cancelled.
+    acceptDialogs(page);
     await card.getByRole("button", { name: /cancel.*refund/i }).click();
     await page.waitForURL(/\/account\?.*cancelled=/);
     await expect(page.getByRole("status").filter({ hasText: code })).toContainText(/cancelled/i);
