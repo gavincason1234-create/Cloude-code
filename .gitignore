@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# playwright output
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# a site checkout placed inside this repo (CI uses ./site; SITE_DIR can point anywhere)
+.site/
+site/
+
+# misc
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example

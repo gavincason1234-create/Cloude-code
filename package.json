@@ -1,0 +1,28 @@
+{
+  "name": "truck-lot-harness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Test & build harness for Grandma's Truck Lot: Playwright end-to-end tests that drive the site in memory mode, plus scripts that check and build the site repo.",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "type": "module",
+  "scripts": {
+    "site:install": "bash scripts/install-site.sh",
+    "site:check": "bash scripts/check-site.sh",
+    "site:build": "bash scripts/build-site.sh",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:list": "playwright test --list",
+    "e2e:report": "playwright show-report",
+    "typecheck": "tsc --noEmit -p .",
+    "all": "bash scripts/build-site.sh && SKIP_BUILD=1 playwright test",
+    "clean": "rm -rf test-results playwright-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "^22.20.4",
+    "typescript": "^5.9.3"
+  }
+}
