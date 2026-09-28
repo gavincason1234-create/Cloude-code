@@ -31,7 +31,9 @@ pnpm e2e:report       # open the HTML report
 ```
 
 `pnpm e2e` on its own builds and starts the site for you (memory mode, port 3100). Reuse a build
-with `SKIP_BUILD=1 pnpm e2e`. Run one file or one browser:
+with `SKIP_BUILD=1 pnpm e2e`. The suite always starts its own server; if a `next start` from an
+earlier look is still on 3100 it stops with `EADDRINUSE` — `pnpm site:stop` clears it (or
+`REUSE_SERVER=1 pnpm e2e` tests against it on purpose). Run one file or one browser:
 
 ```bash
 pnpm e2e -- e2e/booking.spec.ts
@@ -63,7 +65,7 @@ e2e/                    the tests
   account.spec.ts       a signed-in driver
   admin.spec.ts         the owner's dashboard
   security.spec.ts      what must never leak, who must never get in
-scripts/                install-site, check-site, build-site, start-site (+ site-dir.sh they share)
+scripts/                install-site, check-site, build-site, start-site, stop-site (+ site-dir.sh they share)
 playwright.config.ts    mobile 390×844 + desktop 1280×800, serial, traces on failure
 .github/workflows/      site-ci.yml
 .claude/skills/         test-site, build-site

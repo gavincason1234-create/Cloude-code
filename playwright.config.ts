@@ -6,7 +6,10 @@ import { defineConfig, devices } from "@playwright/test";
  * Environment knobs:
  *   SITE_DIR     where the site checkout lives (default ../Grandmas-trucklot-website-)
  *   SKIP_BUILD=1 don't run `next build` before starting — use the existing .next folder
- *   CI=1         one retry, never reuse a server that is already on the port, forbid test.only
+ *   REUSE_SERVER=1 test against a server already listening on the port instead of starting one.
+ *                Off by default, so a forgotten `next start` is never mistaken for the current
+ *                build (`pnpm site:stop` clears one). Never honoured on CI.
+ *   CI=1         one retry, forbid test.only
  *   PW_CHROMIUM  absolute path to a Chromium binary. Only set this when Playwright cannot find
  *                its own browser. Locally Chromium 1194 (in PLAYWRIGHT_BROWSERS_PATH) matches
  *                @playwright/test 1.56.1, so this is normally left unset.
@@ -64,7 +67,9 @@ export default defineConfig({
   webServer: {
     command: "bash scripts/start-site.sh",
     url: BASE_URL,
-    reuseExistingServer: !CI,
+    // Off unless asked: a forgotten `next start` on 3100 would otherwise be tested instead of the
+    // current build, and the failures look like real bugs. `REUSE_SERVER=1 pnpm e2e` opts in.
+    reuseExistingServer: !CI && process.env.REUSE_SERVER === "1",
     timeout: 180_000,
     stdout: "pipe",
     stderr: "pipe",

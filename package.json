@@ -12,6 +12,7 @@
     "site:install": "bash scripts/install-site.sh",
     "site:check": "bash scripts/check-site.sh",
     "site:build": "bash scripts/build-site.sh",
+    "site:stop": "bash scripts/stop-site.sh",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:list": "playwright test --list",

@@ -36,6 +36,8 @@ export const DEV_EMAIL = { driver: "driver@example.com", admin: "admin@example.c
 /** Names inside "Load sample bookings". */
 export const SAMPLE = {
   tonightDriver: "Dale Whitaker",
+  /** Every nightly booking in the sample: tonight, parked since yesterday, in 2 days, parked 3 days and owing. */
+  bookings: ["Dale Whitaker", "Marisol Ortega", "Curtis Bell", "Tommy Reyes"],
   member: "Ray Fleitman",
   unapprovedReview: /porta-potty/i,
 } as const;

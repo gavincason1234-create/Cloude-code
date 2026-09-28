@@ -24,6 +24,8 @@ The build never touches the site's source.
    ```bash
    SKIP_BUILD=1 bash scripts/start-site.sh     # http://127.0.0.1:3100, pretend sign-in on /login
    ```
+   If the terminal is gone, `pnpm site:stop` kills whatever is on 3100. `pnpm e2e` will not start
+   while something is there — it always tests its own fresh server, never a leftover one.
 4. Build then test in one go:
    ```bash
    pnpm all

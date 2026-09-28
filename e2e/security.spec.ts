@@ -45,16 +45,23 @@ test.describe("security", () => {
     expect(await garbage.text()).not.toMatch(GATE_CODE);
   });
 
-  test("a driver asking for /admin/settings is redirected away", async ({ page }) => {
+  test("a driver asking for the owner's settings or booking book is redirected away", async ({ page }) => {
     await signInAs(page, "driver");
 
-    const raw = await page.request.get("/admin/settings", { maxRedirects: 0 });
-    expect([302, 303, 307, 308]).toContain(raw.status());
-    expect(raw.headers()["location"] ?? "").toMatch(/\/account/);
+    // Settings hold the gate codes; Bookings holds every other driver's name, phone and plate.
+    for (const path of ["/admin/settings", "/admin/bookings", "/admin/bookings?q=555"]) {
+      const raw = await page.request.get(path, { maxRedirects: 0 });
+      expect([302, 303, 307, 308], path).toContain(raw.status());
+      expect(raw.headers()["location"] ?? "", path).toMatch(/\/account/);
+    }
 
     await page.goto("/admin/settings");
     await expect(page).toHaveURL(/\/account/);
     await expect(page.locator("main")).not.toContainText(/gate 1/i);
+
+    await page.goto("/admin/bookings");
+    await expect(page).toHaveURL(/\/account/);
+    await expect(page.locator("main").getByRole("heading", { level: 1 })).not.toContainText(/bookings/i);
   });
 
   test("POST /auth/dev is the only way in; forged and tampered cookies are ignored", async ({ page, context, baseURL }) => {

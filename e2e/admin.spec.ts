@@ -1,4 +1,4 @@
-import { acceptDialogs, cardWith, DEFAULT_CODES, expect, loadSample, reserveNightly, resetData, SAMPLE, saveSetting, signInAs, signOut, test } from "./helpers";
+import { acceptDialogs, addDays, cardWith, DEFAULT_CODES, expect, loadSample, lotToday, reserveNightly, resetData, SAMPLE, saveSetting, signInAs, signOut, test } from "./helpers";
 
 /**
  * The owner's dashboard. Serial: every test here shares the one memory store, and the last one
@@ -31,7 +31,7 @@ test.describe("owner dashboard", () => {
     await expect(page.locator("main").getByRole("heading", { level: 1 })).toContainText(/tonight/i);
     // The dashboard nav has every tab.
     const nav = page.getByRole("navigation", { name: /owner|dashboard|admin/i });
-    for (const tab of ["Monthly", "Money", "Reviews", "Settings", "Log"]) {
+    for (const tab of ["Bookings", "Monthly", "Money", "Reviews", "Settings", "Log"]) {
       await expect(nav.getByRole("link", { name: tab }).or(nav.getByRole("listitem").filter({ hasText: tab })).first()).toBeVisible();
     }
   });
@@ -75,6 +75,122 @@ test.describe("owner dashboard", () => {
     // The log knows what the owner just did.
     await page.goto("/admin/log");
     await expect(page.locator("main")).toContainText(/review|parked|here/i);
+  });
+
+  test("Bookings lists every stay and finds one by name, plate, phone or night", async ({ page, request }) => {
+    // The sample: Dale (tonight), Marisol (parked, arrived yesterday for 2 nights), Curtis (in 2 days),
+    // Tommy (parked 3 days ago, owes). Loaded here so the test stands on its own.
+    await resetData(page);
+    await loadSample(page);
+    await page.goto("/admin/bookings");
+    const main = page.locator("main");
+    await expect(main.getByRole("heading", { level: 1 })).toContainText(/bookings/i);
+    for (const name of SAMPLE.bookings) await expect(main).toContainText(name);
+
+    const search = main.getByRole("textbox", { name: /name.*code.*phone.*plate/i });
+    const go = main.getByRole("button", { name: /^search$/i });
+
+    // By part of a name. Each submit is pinned to its own URL so no assertion can pass on the page before it.
+    await search.fill("curtis");
+    await go.click();
+    await expect(page).toHaveURL(/\/admin\/bookings\?.*q=curtis/);
+    await expect(main).toContainText("Curtis Bell");
+    await expect(main).not.toContainText("Marisol Ortega");
+    await expect(main).not.toContainText("Dale Whitaker");
+
+    // By a plate read off the truck, spacing ignored.
+    await search.fill("771pz");
+    await go.click();
+    await expect(page).toHaveURL(/q=771pz/);
+    await expect(main).toContainText("Curtis Bell");
+    await expect(main).not.toContainText("Tommy Reyes");
+
+    // By the last four digits of a phone number.
+    await search.fill("0177");
+    await go.click();
+    await expect(page).toHaveURL(/q=0177/);
+    await expect(main).toContainText("Marisol Ortega");
+    await expect(main).not.toContainText("Curtis Bell");
+
+    // "Who was here on" last night: Marisol's two nights cover it, nobody else's stay does.
+    await search.fill("");
+    const yesterday = addDays(await lotToday(request), -1);
+    await main.getByLabel(/who was here on/i).fill(yesterday);
+    await go.click();
+    await expect(page).toHaveURL(new RegExp(`on=${yesterday}`));
+    await expect(main).toContainText("Marisol Ortega");
+    await expect(main).not.toContainText("Curtis Bell");
+    await expect(main).not.toContainText("Dale Whitaker");
+
+    // Clear brings everyone back.
+    await main.getByRole("link", { name: /^clear$/i }).click();
+    await expect(page).toHaveURL(/\/admin\/bookings\/?$/);
+    for (const name of SAMPLE.bookings) await expect(main).toContainText(name);
+
+    // Nothing found says so in plain words instead of an empty page.
+    await search.fill("zzqx");
+    await go.click();
+    await expect(page).toHaveURL(/q=zzqx/);
+    await expect(main).toContainText(/nothing matches/i);
+  });
+
+  test("a button on Bookings comes back to the same search", async ({ page }) => {
+    await resetData(page);
+    await loadSample(page);
+    await page.goto("/admin/bookings?q=curtis");
+    acceptDialogs(page);
+    const curtis = await cardWith(page, "Curtis Bell");
+    await expect(curtis).toContainText(/reserved/i);
+    await curtis.getByRole("button", { name: /cancel/i }).click();
+    // The round trip is done once his card says cancelled; only then is the URL worth checking.
+    const after = await cardWith(page, "Curtis Bell");
+    await expect(after).toContainText(/cancelled/i);
+    await expect(after).not.toContainText(/reserved/i);
+    await expect(page).toHaveURL(/\/admin\/bookings\?.*q=curtis/);
+    // And he sits under the Past heading, not just somewhere on the page.
+    const past = page.locator("main").getByText(/^past \(\d+\)$/i);
+    await expect(past).toBeVisible();
+    await expect(past.locator("xpath=following-sibling::*[1]")).toContainText("Curtis Bell");
+    // Tonight no longer expects him.
+    await page.goto("/admin");
+    await expect(page.locator("main")).not.toContainText("Curtis Bell");
+  });
+
+  test("Pulled out, Hide from Tonight and Show on Tonight, all from Bookings", async ({ page }) => {
+    await resetData(page);
+    await loadSample(page);
+    await page.goto("/admin/bookings?q=tommy");
+    acceptDialogs(page);
+
+    // Tommy is parked. Pulled out closes the stay; he is now one of Tonight's "Recently left".
+    let card = await cardWith(page, "Tommy Reyes");
+    await card.getByRole("button", { name: /pulled out/i }).click();
+    card = await cardWith(page, "Tommy Reyes");
+    await expect(card.getByRole("button", { name: /pulled out/i })).toHaveCount(0);
+    await expect(card).toContainText(/pulled out/i);
+    await expect(page).toHaveURL(/q=tommy/);
+    await page.goto("/admin");
+    await expect(page.locator("main")).toContainText("Tommy Reyes");
+
+    // Hide him from Tonight: gone from there, still in the book, and the button becomes the undo.
+    await page.goto("/admin/bookings?q=tommy");
+    card = await cardWith(page, "Tommy Reyes");
+    await card.getByRole("button", { name: /hide from tonight/i }).click();
+    card = await cardWith(page, "Tommy Reyes");
+    await expect(card).toContainText(/hidden from tonight/i);
+    await expect(card.getByRole("button", { name: /hide from tonight/i })).toHaveCount(0);
+    await page.goto("/admin");
+    await expect(page.locator("main")).not.toContainText("Tommy Reyes");
+
+    // Show on Tonight puts him back.
+    await page.goto("/admin/bookings?q=tommy");
+    card = await cardWith(page, "Tommy Reyes");
+    await card.getByRole("button", { name: /show on tonight/i }).click();
+    card = await cardWith(page, "Tommy Reyes");
+    await expect(card).not.toContainText(/hidden from tonight/i);
+    await expect(card.getByRole("button", { name: /hide from tonight/i })).toBeVisible();
+    await page.goto("/admin");
+    await expect(page.locator("main")).toContainText("Tommy Reyes");
   });
 
   test("settings changes reach drivers: nightly price on /pricing, gate code on a new confirmation", async ({ page }) => {

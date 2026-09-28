@@ -34,6 +34,7 @@ Every script resolves `SITE_DIR`:
 | `pnpm e2e:ui` | Playwright's UI mode |
 | `pnpm e2e:list` | list tests without running |
 | `pnpm e2e:report` | open the last HTML report |
+| `pnpm site:stop` | stop whatever is listening on 3100 (a forgotten `next start`) |
 | `pnpm all` | `site:build` then `e2e` with `SKIP_BUILD=1` |
 | `pnpm typecheck` | typecheck the harness's own TypeScript (`e2e/`, `playwright.config.ts`) |
 | `pnpm clean` | delete `test-results/` and `playwright-report/` |
@@ -81,9 +82,9 @@ e2e/helpers.ts         the `test` object to import, signInAs, resetData, loadSam
 e2e/public.spec.ts     pages anyone can see, availability API, robots, manifest, 404, night mode
 e2e/booking.spec.ts    guest booking + /find + API rules (honeypot, past date, availability drops)
 e2e/account.spec.ts    signed-in driver: list, cancel/refund, sign out
-e2e/admin.spec.ts      owner dashboard: access rules, sample data through every tab, settings → drivers
+e2e/admin.spec.ts      owner dashboard: access rules, sample data through every tab, Bookings search, settings → drivers
 e2e/security.spec.ts   what must never leak (codes, phone numbers) and who must never get in
-scripts/               site-dir.sh (sourced), install-site.sh, check-site.sh, build-site.sh, start-site.sh
+scripts/               site-dir.sh (sourced), install-site.sh, check-site.sh, build-site.sh, start-site.sh, stop-site.sh
 .github/workflows/     site-ci.yml — nightly + on demand + push to main
 .claude/skills/        test-site, build-site — the commands above, for Claude Code sessions
 ```
@@ -115,5 +116,7 @@ scripts/               site-dir.sh (sourced), install-site.sh, check-site.sh, bu
   and a screenshot. `pnpm exec playwright show-trace test-results/**/trace.zip` for one trace.
 - "SITE_DIR ... is not a directory" → clone the site next to this repo or set `SITE_DIR`.
 - Server never comes up → run `pnpm site:build` on its own to see the build error.
-- The port is busy → something else is on 3100; locally Playwright reuses it (`reuseExistingServer`),
-  so kill a stale server if the tests seem to run against old code.
+- "EADDRINUSE 127.0.0.1:3100" → a stale `next start` is still up. Playwright starts its own server
+  and will not reuse one unless you run `REUSE_SERVER=1 pnpm e2e`. Find the old one with
+  `pnpm site:stop` (kills whatever listens on 3100). `ss` is not on the dev box — a `ss | grep` check
+  silently says "free" — use `fuser 3100/tcp` or `lsof -i :3100`, which are.
